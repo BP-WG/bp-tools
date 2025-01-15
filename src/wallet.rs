@@ -36,7 +36,7 @@ use psbt::{PsbtConstructor, Utxo};
 
 use crate::{
     BlockInfo, CoinRow, Indexer, Layer2, Layer2Cache, Layer2Data, Layer2Descriptor, Layer2Empty,
-    MayError, MiningInfo, NoLayer2, Party, TxRow, WalletAddr, WalletTx, WalletUtxo,
+    MayError, MiningInfo, NoLayer2, Party, TxRow, TxStatus, WalletAddr, WalletTx, WalletUtxo,
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Display, Error)]
@@ -346,6 +346,9 @@ impl<L2C: Layer2Cache> WalletCache<L2C> {
         res
     }
 
+    /// Prunes transaction cache by removing all transactions with `TxStatus::Unknown`
+    pub fn prune(&mut self) { self.tx.retain(|_, tx| tx.status != TxStatus::Unknown) }
+
     pub fn addresses_on(&self, keychain: Keychain) -> &BTreeSet<WalletAddr> {
         self.addr.get(&keychain).unwrap_or_else(|| {
             panic!("keychain #{keychain} is not supported by the wallet descriptor")
@@ -561,6 +564,9 @@ impl<K, D: Descriptor<K>, L2: Layer2> Wallet<K, D, L2> {
     pub fn update<I: Indexer>(&mut self, indexer: &I) -> MayError<(), Vec<I::Error>> {
         self.cache.update::<I, K, D, L2>(&self.descr, indexer).map(|_| ())
     }
+
+    /// Prunes transaction cache by removing all transactions with `TxStatus::Unknown`
+    pub fn prune(&mut self) { self.cache.prune() }
 
     pub fn to_deriver(&self) -> D
     where
