@@ -3,24 +3,24 @@ members = ["."]
 exclude = ["convert"]
 
 [workspace.package]
-version = "0.11.0-beta.9.1"
+version = "0.12.0-beta.4"
 keywords = ["bitcoin", "wallet", "descriptor-wallet", "psbt", "taproot"]
 categories = ["cryptography::cryptocurrencies"]
 authors = ["Dr Maxim Orlovsky <orlovsky@lnp-bp.org>"]
 homepage = "https://lnp-bp.org"
 repository = "https://github.com/BP-WG/bp-wallet"
-rust-version = "1.77.0"
+rust-version = "1.82.0"
 edition = "2021"
 license = "Apache-2.0"
 
 [workspace.dependencies]
-amplify = "4.7.0"
+amplify = "4.8.0"
 nonasync = "0.1.2"
-bp-std = "0.11.0-beta.9.1"
-psbt = "0.11.0-beta.9.1"
-descriptors = "0.11.0-beta.9.1"
-bp-esplora = { version = "0.11.0-beta.9", default-features = false, features = ["blocking"] }
-bp-electrum = "0.11.0-beta.9.3"
+bp-std = "=0.12.0-beta.4"
+psbt = "=0.12.0-beta.4"
+descriptors = "=0.12.0-beta.4"
+bp-esplora = { version = "=0.12.0-beta.4", default-features = false, features = ["blocking"] }
+bp-electrum = "=0.12.0-beta.4"
 serde_crate = { package = "serde", version = "1", features = ["derive"] }
 serde_json = "1.0.114"
 serde_yaml = "0.9.19"
@@ -79,7 +79,7 @@ colored = { version = "2", optional = true }
 # Cli-only:
 base64 = { version = "0.22.1", optional = true }
 env_logger = { version = "0.11.5", optional = true }
-clap = { version = "4.5.16", features = ["derive", "env"], optional = true }
+clap = { version = "4.5.23", features = ["derive", "env"], optional = true }
 shellexpand = { version = "3.1.0", optional = true }
 
 [features]
@@ -96,3 +96,10 @@ fs = ["serde"]
 client-side-validation = ["bp-std/client-side-validation", "psbt/client-side-validation"]
 strict-encoding = ["bp-std/strict_encoding", "psbt/strict_encoding"]
 serde = ["serde_crate", "serde_yaml", "toml", "bp-std/serde", "psbt/serde", "descriptors/serde"]
+
+[patch.crates-io]
+bp-invoice = { git = "https://github.com/BP-WG/bp-std", branch = "v0.12" }
+bp-derive = { git = "https://github.com/BP-WG/bp-std", branch = "v0.12" }
+descriptors = { git = "https://github.com/BP-WG/bp-std", branch = "v0.12" }
+psbt = { git = "https://github.com/BP-WG/bp-std", branch = "v0.12" }
+bp-std = { git = "https://github.com/BP-WG/bp-std", branch = "v0.12" }

@@ -20,6 +20,7 @@
 // limitations under the License.
 
 use std::collections::BTreeMap;
+use std::mem;
 use std::num::NonZeroU32;
 use std::str::FromStr;
 
@@ -78,6 +79,13 @@ impl Indexer for Client {
     ) -> MayError<usize, Vec<Self::Error>> {
         let mut errors = Vec::<ElectrumError>::new();
 
+        // First, we scan all addresses.
+        // Addresses may be re-used, so known transactions doesn't help here.
+        // We collect these transactions, which contain the most recent information, into a new
+        // cache. We remove old transaction, since its data are now updated (for instance, if a
+        // transaction was re-orged, it may have a different height).
+
+        let mut old_cache = mem::take(&mut cache.tx);
         let mut address_index = BTreeMap::new();
         for keychain in descriptor.keychains() {
             let mut empty_count = 0usize;
@@ -104,6 +112,7 @@ impl Indexer for Client {
 
                 empty_count = 0;
 
+                // TODO: Separate as `WalletTx::from_electrum_history` method.
                 let mut process_history_entry =
                     |hr: GetHistoryRes| -> Result<WalletTx, ElectrumError> {
                         let txid = hr.tx_hash;
@@ -202,6 +211,7 @@ impl Indexer for Client {
                 for hr in hres {
                     match process_history_entry(hr) {
                         Ok(tx) => {
+                            old_cache.remove(&tx.txid);
                             cache.tx.insert(tx.txid, tx);
                         }
                         Err(e) => errors.push(e),
@@ -211,6 +221,12 @@ impl Indexer for Client {
                 let wallet_addr = WalletAddr::<i64>::from(derive);
                 address_index.insert(script, (wallet_addr, txids));
             }
+        }
+
+        // The remaining transactions are unmined ones.
+        for (txid, mut tx) in old_cache {
+            tx.status = TxStatus::Unknown;
+            cache.tx.insert(txid, tx);
         }
 
         // TODO: Update headers & tip
