@@ -323,7 +323,7 @@ impl<O: DescriptorOpts> Exec for Args<Command, O> {
                     if *publish {
                         let indexer = self.indexer()?;
                         eprint!("Publishing transaction via {} ... ", indexer.name());
-                        indexer.publish(&tx)?;
+                        indexer.broadcast(&tx)?;
                         eprintln!("success");
                     }
                 }
@@ -343,7 +343,7 @@ impl<O: DescriptorOpts> Exec for Args<Command, O> {
                     if *publish {
                         let indexer = self.indexer()?;
                         eprint!("Publishing transaction via {} ... ", indexer.name());
-                        indexer.publish(&tx)?;
+                        indexer.broadcast(&tx)?;
                         eprintln!("success");
                     }
                 }

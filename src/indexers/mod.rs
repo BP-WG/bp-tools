@@ -45,13 +45,21 @@ pub trait Indexer {
     fn create<K, D: Descriptor<K>, L2: Layer2>(
         &self,
         descr: &WalletDescr<K, D, L2::Descr>,
-    ) -> MayError<WalletCache<L2::Cache>, Vec<Self::Error>>;
+    ) -> MayError<WalletCache<L2::Cache>, Vec<Self::Error>> {
+        let mut cache = WalletCache::new_nonsync();
+        self.update::<K, D, L2>(descr, &mut cache, true).map(|_| cache)
+    }
 
+    /// Update the wallet transaction cache and balances
+    ///
+    /// If `prune` argument is set, removes all transactions which are not present in blockchain or
+    /// mempool (not known to the indexer, i.e. has `TxStatus::Unknown`).
     fn update<K, D: Descriptor<K>, L2: Layer2>(
         &self,
         descr: &WalletDescr<K, D, L2::Descr>,
         cache: &mut WalletCache<L2::Cache>,
+        prune: bool,
     ) -> MayError<usize, Vec<Self::Error>>;
 
-    fn publish(&self, tx: &Tx) -> Result<(), Self::Error>;
+    fn broadcast(&self, tx: &Tx) -> Result<(), Self::Error>;
 }

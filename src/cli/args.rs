@@ -41,7 +41,7 @@ use crate::{AnyIndexer, Wallet};
 #[derive(Clone, Eq, PartialEq, Debug)]
 #[command(author, version, about)]
 pub struct Args<C: Clone + Eq + Debug + Subcommand, O: DescriptorOpts = DescrStdOpts> {
-    /// Set verbosity level.
+    /// Set verbosity level
     ///
     /// Can be used multiple times to increase verbosity.
     #[clap(short, long, global = true, action = clap::ArgAction::Count)]
@@ -53,9 +53,13 @@ pub struct Args<C: Clone + Eq + Debug + Subcommand, O: DescriptorOpts = DescrStd
     #[command(flatten)]
     pub resolver: ResolverOpt,
 
-    /// Force-sync wallet data with the indexer before performing the operation.
+    /// Force-sync wallet data with the indexer before performing the operation
     #[clap(long, global = true)]
     pub sync: bool,
+
+    /// Prune old transactions from the cache during the sync operation
+    #[clap(long, global = true)]
+    pub prune: bool,
 
     #[command(flatten)]
     pub general: GeneralOpts,
@@ -72,6 +76,7 @@ impl<C: Clone + Eq + Debug + Subcommand, O: DescriptorOpts> Args<C, O> {
             wallet: self.wallet.clone(),
             resolver: self.resolver.clone(),
             sync: self.sync,
+            prune: self.prune,
             general: self.general.clone(),
             command: cmd.clone(),
         }
@@ -154,7 +159,7 @@ impl<C: Clone + Eq + Debug + Subcommand, O: DescriptorOpts> Args<C, O> {
         if sync {
             let indexer = self.indexer()?;
             eprint!("Syncing");
-            if let Some(errors) = wallet.update(&indexer).into_err() {
+            if let Some(errors) = wallet.update(&indexer, self.prune).into_err() {
                 eprintln!(" partial, some requests has failed:");
                 for err in errors {
                     eprintln!("- {err}");
