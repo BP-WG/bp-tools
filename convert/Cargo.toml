@@ -2,7 +2,7 @@
 
 [package]
 name = "bp-convert"
-version = "0.11.0-beta.8"
+version = "0.12.0-beta.4"
 description = "Convertor between bp-wallet and rust-bitcoin data types"
 keywords = ["bitcoin", "wallet"]
 categories = ["cryptography::cryptocurrencies"]
@@ -10,7 +10,7 @@ readme = "../README.md"
 authors = ["Dr Maxim Orlovsky <orlovsky@lnp-bp.org>"]
 homepage = "https://lnp-bp.org"
 repository = "https://github.com/BP-WG/bp-wallet"
-rust-version = "1.75.0" # Due to bp-std
+rust-version = "1.82.0"
 edition = "2021"
 license = "Apache-2.0"
 
@@ -18,7 +18,7 @@ license = "Apache-2.0"
 name = "bconv"
 
 [dependencies]
-amplify = "4.7.0"
-secp256k1 = "0.29.0"
+amplify = "4.8.0"
+secp256k1 = "0.30.0"
 bitcoin = "0.32.2"
-bp-std = "0.11.0-beta.8"
+bp-std = "0.12.0-beta.4"

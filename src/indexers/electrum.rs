@@ -78,16 +78,24 @@ impl Indexer for Client {
     ) -> MayError<usize, Vec<Self::Error>> {
         let mut errors = Vec::<ElectrumError>::new();
 
+        #[cfg(feature = "log")]
+        log::debug!("Updating wallet from Electrum indexer");
+
+        // First, we scan all addresses.
+        // Addresses may be re-used, so known transactions doesn't help here.
+        // We collect these transactions, which contain the most recent information, into a new
+        // cache. We remove old transaction, since its data are now updated (for instance, if a
+        // transaction was re-orged, it may have a different height).
+
         let mut address_index = BTreeMap::new();
         for keychain in descriptor.keychains() {
             let mut empty_count = 0usize;
-            #[cfg(feature = "cli")]
-            eprint!(" keychain {keychain} ");
             for derive in descriptor.addresses(keychain) {
+                #[cfg(feature = "log")]
+                log::trace!("Retrieving transaction for {derive}");
+
                 let script = derive.addr.script_pubkey();
 
-                #[cfg(feature = "cli")]
-                eprint!(".");
                 let mut txids = Vec::new();
                 let Ok(hres) =
                     self.script_get_history(&script).map_err(|err| errors.push(err.into()))
@@ -108,6 +116,9 @@ impl Indexer for Client {
                     |hr: GetHistoryRes| -> Result<WalletTx, ElectrumError> {
                         let txid = hr.tx_hash;
                         txids.push(txid);
+
+                        #[cfg(feature = "log")]
+                        log::trace!("- {txid}");
 
                         // get the tx details (requires electrum verbose support)
                         let tx_details = self.raw_call("blockchain.transaction.get", vec![
@@ -283,13 +294,24 @@ impl Indexer for Client {
         }
 
         if errors.is_empty() {
+            #[cfg(feature = "log")]
+            log::debug!("Wallet update from the indexer successfully complete with no errors");
             MayError::ok(0)
         } else {
+            #[cfg(feature = "log")]
+            {
+                log::error!(
+                    "The following errors has happened during wallet update from the indexer"
+                );
+                for err in &errors {
+                    log::error!("- {err}");
+                }
+            }
             MayError::err(0, errors)
         }
     }
 
-    fn publish(&self, tx: &Tx) -> Result<(), Self::Error> {
+    fn broadcast(&self, tx: &Tx) -> Result<(), Self::Error> {
         self.transaction_broadcast(tx)?;
         Ok(())
     }

@@ -20,9 +20,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use bpstd::Txid;
-use esplora::BlockingClient;
-
 impl super::esplora::Client {
     /// Creates a new mempool client with the specified URL.
     ///
@@ -42,44 +39,5 @@ impl super::esplora::Client {
             kind: super::esplora::ClientKind::Mempool,
         };
         Ok(client)
-    }
-}
-
-pub trait Mempool {
-    #[allow(clippy::result_large_err)]
-    fn address_txs(
-        &self,
-        address: &str,
-        last_seen: Option<Txid>,
-    ) -> Result<Vec<esplora::Tx>, esplora::Error>;
-}
-
-impl Mempool for BlockingClient {
-    /// Retrieves the transactions associated with a specific address from the mempool.
-    ///
-    /// # Arguments
-    ///
-    /// * `address` - The address for which to retrieve transactions.
-    /// * `last_seen` - An optional parameter indicating the last seen transaction ID. If provided,
-    ///   only transactions after the specified ID will be returned.
-    ///
-    /// # Returns
-    ///
-    /// Returns a `Result` containing a vector of `esplora::Tx` objects representing the
-    /// transactions associated with the address, or an `esplora::Error` if an error occurs
-    /// during the retrieval process.
-    fn address_txs(
-        &self,
-        address: &str,
-        last_seen: Option<Txid>,
-    ) -> Result<Vec<esplora::Tx>, esplora::Error> {
-        let url = self.url();
-        let agent = self.agent();
-        let url = match last_seen {
-            Some(last_seen) => format!("{}/address/{}/txs/chain/{}", url, address, last_seen),
-            None => format!("{}/address/{}/txs", url, address),
-        };
-        let resp = agent.get(&url).call()?.into_json()?;
-        Ok(resp)
     }
 }

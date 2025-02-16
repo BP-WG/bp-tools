@@ -323,7 +323,7 @@ impl<O: DescriptorOpts> Exec for Args<Command, O> {
                     if *publish {
                         let indexer = self.indexer()?;
                         eprint!("Publishing transaction via {} ... ", indexer.name());
-                        indexer.publish(&tx)?;
+                        indexer.broadcast(&tx)?;
                         eprintln!("success");
                     }
                 }
@@ -343,7 +343,7 @@ impl<O: DescriptorOpts> Exec for Args<Command, O> {
                     if *publish {
                         let indexer = self.indexer()?;
                         eprint!("Publishing transaction via {} ... ", indexer.name());
-                        indexer.publish(&tx)?;
+                        indexer.broadcast(&tx)?;
                         eprintln!("success");
                     }
                 }
@@ -523,7 +523,8 @@ impl<O: DescriptorOpts> Exec for Args<BpCommand, O> {
 
                 // TODO: Support lock time and RBFs
                 let params = TxParams::with(*fee);
-                let (mut psbt, _) = wallet.construct_psbt(coins, beneficiaries, params)?;
+                let (mut psbt, _) =
+                    wallet.construct_psbt(coins, beneficiaries.iter().copied(), params)?;
                 psbt.version = if *v2 { PsbtVer::V2 } else { PsbtVer::V0 };
                 psbt_write_or_print(&psbt, psbt_file.as_deref())?;
             }

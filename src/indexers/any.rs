@@ -137,14 +137,14 @@ impl Indexer for AnyIndexer {
         }
     }
 
-    fn publish(&self, tx: &Tx) -> Result<(), Self::Error> {
+    fn broadcast(&self, tx: &Tx) -> Result<(), Self::Error> {
         match self {
             #[cfg(feature = "electrum")]
-            AnyIndexer::Electrum(inner) => inner.publish(tx).map_err(|e| e.into()),
+            AnyIndexer::Electrum(inner) => inner.broadcast(tx).map_err(|e| e.into()),
             #[cfg(feature = "esplora")]
-            AnyIndexer::Esplora(inner) => inner.publish(tx).map_err(|e| e.into()),
+            AnyIndexer::Esplora(inner) => inner.broadcast(tx).map_err(|e| e.into()),
             #[cfg(feature = "mempool")]
-            AnyIndexer::Mempool(inner) => inner.publish(tx).map_err(|e| e.into()),
+            AnyIndexer::Mempool(inner) => inner.broadcast(tx).map_err(|e| e.into()),
         }
     }
 }

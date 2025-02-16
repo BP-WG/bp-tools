@@ -53,5 +53,5 @@ pub trait Indexer {
         cache: &mut WalletCache<L2::Cache>,
     ) -> MayError<usize, Vec<Self::Error>>;
 
-    fn publish(&self, tx: &Tx) -> Result<(), Self::Error>;
+    fn broadcast(&self, tx: &Tx) -> Result<(), Self::Error>;
 }
