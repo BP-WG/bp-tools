@@ -515,6 +515,8 @@ impl<K, D: Descriptor<K>> Wallet<K, D> {
             layer2: none!(),
         }
     }
+    pub fn data_l1(&self) -> &WalletData<Layer2Empty> { &self.data }
+    pub fn cache_l1(&self) -> &WalletCache<Layer2Empty> { &self.cache }
 }
 
 impl<K, D: Descriptor<K>, L2: Layer2> Wallet<K, D, L2> {
